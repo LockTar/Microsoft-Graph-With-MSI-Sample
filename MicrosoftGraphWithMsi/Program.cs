@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Azure.Identity;
 using Microsoft.Graph;
 using MicrosoftGraphWithMsi.Graph;
 using MicrosoftGraphWithMsi.Helpers;
