@@ -21,11 +21,14 @@ namespace MicrosoftGraphWithMsi.Helpers
             Console.WriteLine("\n\n");
 
             var client = new GraphServiceClient(
-                new DelegateAuthenticationProvider(
-                    async requestMessage =>
-                    {
-                        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("bearer", token);
-                    }));
+                new DelegateAuthenticationProvider((requestMessage) =>
+                {
+                    requestMessage
+                        .Headers
+                        .Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    return Task.CompletedTask;
+                }));
 
             return client;
         }
