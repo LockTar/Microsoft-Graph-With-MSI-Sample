@@ -11,4 +11,5 @@ Sample application that uses the Microsoft Graph C# sdk for getting and writing 
 ## FAQ
 
 ### I get forbidden error
-Make sure your user has the correct permissions like Directory.ReadWrite.All
+Make sure your user has the correct permissions like Directory.ReadWrite.All.
+See for more information on how to give the MSI of your app service the correct permissions this [blog post](https://www.rahulpnath.com/blog/how-to-authenticate-with-microsoft-graph-api-using-managed-service-identity/#using-managed-service-identity).
