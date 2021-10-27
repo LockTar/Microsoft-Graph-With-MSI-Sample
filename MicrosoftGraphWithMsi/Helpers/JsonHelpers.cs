@@ -6,6 +6,23 @@ namespace MicrosoftGraphWithMsi.Helpers
 {
     public static class JsonHelpers
     {
+        public static string FormatJson(object objectToReturnAsJson)
+        {
+            try
+            {
+                string prettyJson = JsonSerializer.Serialize(objectToReturnAsJson, new JsonSerializerOptions()
+                {
+                    WriteIndented = true
+                });
+
+                return prettyJson;
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
+        }
+
         public static string FormatJson(string json)
         {
             try
@@ -47,9 +64,7 @@ namespace MicrosoftGraphWithMsi.Helpers
     {
         public static string ToFormattedJson(this object objectToReturnAsJson)
         {
-            // Use newtonsoft here because subcollections of Microsoft Graph objects give errors. 
-            // Sub collection properties have newtonsoft ignore property. So this will work.
-            return Newtonsoft.Json.JsonConvert.SerializeObject(objectToReturnAsJson).FormatJson();
+            return JsonHelpers.FormatJson(objectToReturnAsJson);
         }
 
         public static string FormatJson(this string json)
