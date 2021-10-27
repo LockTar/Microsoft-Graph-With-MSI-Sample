@@ -1,6 +1,7 @@
 ﻿using Microsoft.Graph;
 using MicrosoftGraphWithMsi.Helpers;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
@@ -36,7 +37,7 @@ namespace MicrosoftGraphWithMsi.Graph
 
                 Console.WriteLine();
                 Console.WriteLine("Groups (first page) in JSON:");
-                Console.WriteLine(groups.CurrentPage.ToFormattedJson());
+                Console.WriteLine(groups.CurrentPage.Select(s => new { s.DisplayName, s.Id }).ToFormattedJson());
             }
         }
 
