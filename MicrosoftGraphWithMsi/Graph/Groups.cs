@@ -26,6 +26,20 @@ namespace MicrosoftGraphWithMsi.Graph
             return group;
         }
 
+        internal static async Task ListGroupsAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput)
+        {
+            if (writeJsonObjectsToOutput)
+            {
+                var groups = await graphClient.Groups
+                                .Request()
+                                .GetAsync();
+
+                Console.WriteLine();
+                Console.WriteLine("Groups (first page) in JSON:");
+                Console.WriteLine(groups.CurrentPage.ToFormattedJson());
+            }
+        }
+
         internal static async Task<Group> GetOrCreateGroupIfNotExistAsync(GraphServiceClient graphClient, string groupName)
         {
             Group group = null;

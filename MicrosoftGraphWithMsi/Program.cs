@@ -23,13 +23,14 @@ namespace MicrosoftGraphWithMsi
             WriteSectionDevider();
 
             // Groups
+            //await Groups.ListGroupsAsync(graphClient, writeJsonObjectsToOutput);
             Group group = await Groups.GetOrCreateGroupIfNotExistAsync(graphClient, groupName);
             await Groups.DisplayGroupAsync(graphClient, group, writeJsonObjectsToOutput);
             await Groups.AddGroupMemberAsync(graphClient, group, "1dbbdd07-9978-489f-b676-6c084a890b49");
             await Groups.AddGroupOwnerAsync(graphClient, group, "bf41f70e-be3c-473a-b594-1e7c57b28da4");
             await Groups.ListGroupMembersAsync(graphClient, group, writeJsonObjectsToOutput);
             await Groups.ListGroupOwnersAsync(graphClient, group, writeJsonObjectsToOutput);
-            //await Groups.DeleteGroupAsync(graphClient, group);
+            await Groups.DeleteGroupAsync(graphClient, group);
 
             WriteSectionDevider();
 
