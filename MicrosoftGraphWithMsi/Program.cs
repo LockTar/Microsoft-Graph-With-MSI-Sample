@@ -21,6 +21,9 @@ namespace MicrosoftGraphWithMsi
             // User
             await Users.DisplayLoggedInUserInfoAsync(graphClient, writeJsonObjectsToOutput);
 
+            // Show random user (maybe doesn't exist) to test retry functionality.
+            //await Users.DisplayUserInfoAsync(graphClient, Guid.NewGuid().ToString(), writeJsonObjectsToOutput);
+
             WriteSectionDevider();
 
             // Groups
