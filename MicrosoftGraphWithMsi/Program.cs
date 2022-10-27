@@ -12,7 +12,7 @@ namespace MicrosoftGraphWithMsi
         {
             const string groupName = "AAATest";
             const string applicationName = "AAATestApplication";
-            bool writeJsonObjectsToOutput = true;
+            bool writeJsonObjectsToOutput = false;
 
             Console.WriteLine("Hello World!\n");
 
@@ -33,6 +33,8 @@ namespace MicrosoftGraphWithMsi
             //await Groups.ListGroupOwnersAsync(graphClient, group, writeJsonObjectsToOutput);
             //await Groups.DeleteGroupAsync(graphClient, group);
 
+            //WriteSectionDevider();
+
             // Applications
             //await Applications.ListApplicationsAsync(graphClient, writeJsonObjectsToOutput);
             //Application application = await Applications.GetOrCreateApplicationIfNotExistAsync(graphClient, applicationName);
@@ -41,7 +43,7 @@ namespace MicrosoftGraphWithMsi
             //await Applications.ListApplicationOwnersAsync(graphClient, application, writeJsonObjectsToOutput);
             //await Applications.DeleteApplicationAsync(graphClient, application);
 
-            WriteSectionDevider();
+            //WriteSectionDevider();
 
             Console.WriteLine("Bye!!!\n");
         }        
