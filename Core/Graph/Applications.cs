@@ -1,5 +1,5 @@
 ﻿using Microsoft.Graph;
-using MicrosoftGraphWithMsi.Helpers;
+using Core.Helpers;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -7,11 +7,11 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MicrosoftGraphWithMsi.Graph
+namespace Core.Graph
 {
-    internal static class Applications
+    public static class Applications
     {
-        internal static async Task<Application> DisplayApplicationAsync(GraphServiceClient graphClient, Application application, bool writeJsonObjectsToOutput = true)
+        public static async Task<Application> DisplayApplicationAsync(GraphServiceClient graphClient, Application application, bool writeJsonObjectsToOutput = true)
         {
             application = await graphClient.Applications[application.Id]
                             .Request()
@@ -27,7 +27,7 @@ namespace MicrosoftGraphWithMsi.Graph
             return application;
         }
 
-        internal static async Task ListApplicationsAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput)
+        public static async Task ListApplicationsAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput)
         {
             if (writeJsonObjectsToOutput)
             {
@@ -41,7 +41,7 @@ namespace MicrosoftGraphWithMsi.Graph
             }
         }
 
-        internal static async Task<Application> GetOrCreateApplicationIfNotExistAsync(GraphServiceClient graphClient, string applicationName)
+        public static async Task<Application> GetOrCreateApplicationIfNotExistAsync(GraphServiceClient graphClient, string applicationName)
         {
             Application application = null;
 
@@ -82,7 +82,7 @@ namespace MicrosoftGraphWithMsi.Graph
             return application;
         }
 
-        internal static async Task DeleteApplicationAsync(GraphServiceClient graphClient, Application application)
+        public static async Task DeleteApplicationAsync(GraphServiceClient graphClient, Application application)
         {
             Console.WriteLine($"\nGoing to delete application '{application.DisplayName}' with id {application.Id}");
 
@@ -93,7 +93,7 @@ namespace MicrosoftGraphWithMsi.Graph
             Console.WriteLine($"\nApplication '{application.DisplayName}' deleted!");
         }
 
-        internal static async Task ListApplicationOwnersAsync(GraphServiceClient graphClient, Application application, bool writeJsonObjectsToOutput)
+        public static async Task ListApplicationOwnersAsync(GraphServiceClient graphClient, Application application, bool writeJsonObjectsToOutput)
         {
             if (writeJsonObjectsToOutput)
             {
@@ -108,7 +108,7 @@ namespace MicrosoftGraphWithMsi.Graph
             }
         }
 
-        internal static async Task AddApplicationOwnerAsync(GraphServiceClient graphClient, Application application, string ownerToAdd)
+        public static async Task AddApplicationOwnerAsync(GraphServiceClient graphClient, Application application, string ownerToAdd)
         {
             // Get user to add
             var user = await graphClient.Users[ownerToAdd]

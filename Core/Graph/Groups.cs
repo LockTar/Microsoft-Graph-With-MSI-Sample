@@ -1,17 +1,12 @@
 ﻿using Microsoft.Graph;
-using MicrosoftGraphWithMsi.Helpers;
-using System;
-using System.Linq;
-using System.Collections.Generic;
+using Core.Helpers;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MicrosoftGraphWithMsi.Graph
+namespace Core.Graph
 {
-    internal static class Groups
+    public static class Groups
     {
-        internal static async Task<Group> DisplayGroupAsync(GraphServiceClient graphClient, Group group, bool writeJsonObjectsToOutput = true)
+        public static async Task<Group> DisplayGroupAsync(GraphServiceClient graphClient, Group group, bool writeJsonObjectsToOutput = true)
         {
             group = await graphClient.Groups[group.Id]
                             .Request()
@@ -27,7 +22,7 @@ namespace MicrosoftGraphWithMsi.Graph
             return group;
         }
 
-        internal static async Task ListGroupsAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput)
+        public static async Task ListGroupsAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput)
         {
             if (writeJsonObjectsToOutput)
             {
@@ -41,7 +36,7 @@ namespace MicrosoftGraphWithMsi.Graph
             }
         }
 
-        internal static async Task<Group> GetOrCreateGroupIfNotExistAsync(GraphServiceClient graphClient, string groupName)
+        public static async Task<Group> GetOrCreateGroupIfNotExistAsync(GraphServiceClient graphClient, string groupName)
         {
             Group group = null;
 
@@ -85,7 +80,7 @@ namespace MicrosoftGraphWithMsi.Graph
             return group;
         }
 
-        internal static async Task DeleteGroupAsync(GraphServiceClient graphClient, Group group)
+        public static async Task DeleteGroupAsync(GraphServiceClient graphClient, Group group)
         {
             Console.WriteLine($"\nGoing to delete group '{group.DisplayName}' with id {group.Id}");
 
@@ -96,7 +91,7 @@ namespace MicrosoftGraphWithMsi.Graph
             Console.WriteLine($"\nGroup '{group.DisplayName}' deleted!");
         }
 
-        internal static async Task ListGroupOwnersAsync(GraphServiceClient graphClient, Group group, bool writeJsonObjectsToOutput)
+        public static async Task ListGroupOwnersAsync(GraphServiceClient graphClient, Group group, bool writeJsonObjectsToOutput)
         {
             if (writeJsonObjectsToOutput)
             {
@@ -111,7 +106,7 @@ namespace MicrosoftGraphWithMsi.Graph
             }
         }
 
-        internal static async Task ListGroupMembersAsync(GraphServiceClient graphClient, Group group, bool writeJsonObjectsToOutput)
+        public static async Task ListGroupMembersAsync(GraphServiceClient graphClient, Group group, bool writeJsonObjectsToOutput)
         {
             if (writeJsonObjectsToOutput)
             {
@@ -126,7 +121,7 @@ namespace MicrosoftGraphWithMsi.Graph
             }
         }
 
-        internal static async Task AddGroupOwnerAsync(GraphServiceClient graphClient, Group group, string ownerToAdd)
+        public static async Task AddGroupOwnerAsync(GraphServiceClient graphClient, Group group, string ownerToAdd)
         {
             // Get user to add
             var user = await graphClient.Users[ownerToAdd]
@@ -160,7 +155,7 @@ namespace MicrosoftGraphWithMsi.Graph
             }
         }
 
-        internal static async Task AddGroupMemberAsync(GraphServiceClient graphClient, Group group, string memberToAdd)
+        public static async Task AddGroupMemberAsync(GraphServiceClient graphClient, Group group, string memberToAdd)
         {
             // Get user to add
             var user = await graphClient.Users[memberToAdd]

@@ -1,14 +1,14 @@
 ﻿using Microsoft.Graph;
-using MicrosoftGraphWithMsi.Helpers;
+using Core.Helpers;
 using System.Net.Http.Headers;
 
-namespace MicrosoftGraphWithMsi.Graph
+namespace Core.Graph
 {
-    internal static class Users
+    public static class Users
     {
         private const string RETRY_AFTER = "Retry-After";
 
-        internal static async Task DisplayLoggedInUserInfoAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput = true)
+        public static async Task DisplayLoggedInUserInfoAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput = true)
         {
             User user = await graphClient.Me
                             .Request()
@@ -18,7 +18,7 @@ namespace MicrosoftGraphWithMsi.Graph
             PrintUserInformation(user, writeJsonObjectsToOutput);
         }
 
-        internal static async Task DisplayUserInfoAsync(GraphServiceClient graphClient, string userId, bool writeJsonObjectsToOutput = true)
+        public static async Task DisplayUserInfoAsync(GraphServiceClient graphClient, string userId, bool writeJsonObjectsToOutput = true)
         {
             const int MaxRetry = 5; // So number of call are (MaxRetry + 1)
 
@@ -58,7 +58,7 @@ namespace MicrosoftGraphWithMsi.Graph
         /// <param name="retry_count"></param>
         /// <param name="delay"></param>
         /// <returns></returns>
-        internal static double CalculateDelay(HttpResponseMessage response, int retry_count, int delay)
+        private static double CalculateDelay(HttpResponseMessage response, int retry_count, int delay)
         {
             HttpHeaders headers = response.Headers;
             double delayInSeconds = delay;

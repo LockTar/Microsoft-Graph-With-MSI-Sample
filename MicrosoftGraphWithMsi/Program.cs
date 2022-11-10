@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Graph;
-using MicrosoftGraphWithMsi.Graph;
-using MicrosoftGraphWithMsi.Helpers;
+using Core.Graph;
+using Core.Helpers;
 
 namespace MicrosoftGraphWithMsi
 {

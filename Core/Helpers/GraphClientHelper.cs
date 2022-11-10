@@ -1,16 +1,12 @@
 ﻿using Azure.Identity;
 using Microsoft.Graph;
-using System;
-using System.Collections.Generic;
 using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MicrosoftGraphWithMsi.Helpers
+namespace Core.Helpers
 {
-    internal static class GraphClientHelper
+    public static class GraphClientHelper
     {
-        internal static async Task<GraphServiceClient> InitializeGraphClientWithMsiAsync()
+        public static async Task<GraphServiceClient> InitializeGraphClientWithMsiAsync()
         {
             var credential = new DefaultAzureCredential();
             var tokenResult = await credential.GetTokenAsync(new Azure.Core.TokenRequestContext(new string[] { "https://graph.microsoft.com" }));
