@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicrosoftGraphWithMsi", "Mi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{693A4153-3AEE-416F-9208-DFAA2FA59265}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicrosoftGraphWithMsi.net7", "MicrosoftGraphWithMsi.net7\MicrosoftGraphWithMsi.net7.csproj", "{16DD47FE-2A99-436D-A803-FF70C2EF466C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{693A4153-3AEE-416F-9208-DFAA2FA59265}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{693A4153-3AEE-416F-9208-DFAA2FA59265}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{693A4153-3AEE-416F-9208-DFAA2FA59265}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16DD47FE-2A99-436D-A803-FF70C2EF466C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16DD47FE-2A99-436D-A803-FF70C2EF466C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16DD47FE-2A99-436D-A803-FF70C2EF466C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16DD47FE-2A99-436D-A803-FF70C2EF466C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
