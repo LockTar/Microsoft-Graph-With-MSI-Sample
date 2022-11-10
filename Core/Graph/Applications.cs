@@ -29,12 +29,15 @@ namespace Core.Graph
 
         public static async Task ListApplicationsAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput)
         {
+            var applications = await graphClient.Applications
+                            .Request()
+                            .GetAsync();
+
+            Console.WriteLine();
+            Console.WriteLine($"Number of applications on first page {applications.Count}");
+
             if (writeJsonObjectsToOutput)
             {
-                var applications = await graphClient.Applications
-                                .Request()
-                                .GetAsync();
-
                 Console.WriteLine();
                 Console.WriteLine("Applications (first page) in JSON:");
                 Console.WriteLine(applications.CurrentPage.Select(s => new { s.DisplayName, s.AppId, s.Id }).ToFormattedJson());

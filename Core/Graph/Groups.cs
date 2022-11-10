@@ -24,12 +24,15 @@ namespace Core.Graph
 
         public static async Task ListGroupsAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput)
         {
+            var groups = await graphClient.Groups
+                            .Request()
+                            .GetAsync();
+
+            Console.WriteLine();
+            Console.WriteLine($"Number of groups on first page are: {groups.Count}");
+
             if (writeJsonObjectsToOutput)
             {
-                var groups = await graphClient.Groups
-                                .Request()
-                                .GetAsync();
-
                 Console.WriteLine();
                 Console.WriteLine("Groups (first page) in JSON:");
                 Console.WriteLine(groups.CurrentPage.Select(s => new { s.DisplayName, s.Id }).ToFormattedJson());
