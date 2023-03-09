@@ -51,12 +51,10 @@ namespace Core.Graph
 
         public static async Task DisplayNumberOfUsersAsync(GraphServiceClient graphClient)//, bool writeJsonObjectsToOutput = true)
         {
-            var usersCount = await graphClient
-                .Users
-                .Count
-                .GetAsync();
+            var count = await graphClient.Users.Count
+                .GetAsync(requestConfiguration => requestConfiguration.Headers.Add("ConsistencyLevel", "eventual"));
 
-            Console.WriteLine($"Number of users in the tenant: {usersCount}");
+            Console.WriteLine($"Number of users in the tenant: {count}");
         }
 
         public static async Task DisplayUsersAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput = true)
