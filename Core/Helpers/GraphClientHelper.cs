@@ -1,5 +1,6 @@
 ﻿using Azure.Identity;
 using Microsoft.Graph;
+using Microsoft.Kiota.Abstractions.Authentication;
 using System.Net.Http.Headers;
 
 namespace Core.Helpers
@@ -16,17 +17,39 @@ namespace Core.Helpers
             Console.WriteLine(token);
             Console.WriteLine("\n\n");
 
-            var client = new GraphServiceClient(
-                new DelegateAuthenticationProvider((requestMessage) =>
-                {
-                    requestMessage
-                        .Headers
-                        .Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var authenticationProvider = new BaseBearerTokenAuthenticationProvider(new TokenProvider());
+            var graphServiceClient = new GraphServiceClient(authenticationProvider);
 
-                    return Task.CompletedTask;
-                }));
+            //var graphServiceClient = new GraphServiceClient(
+            //    new DelegateAuthenticationProvider((requestMessage) =>
+            //    {
+            //        requestMessage
+            //            .Headers
+            //            .Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            return client;
+            //        return Task.CompletedTask;
+            //    }));
+
+            return graphServiceClient;
         }
+    }
+
+    public class TokenProvider : IAccessTokenProvider
+    {
+        public async Task<string> GetAuthorizationTokenAsync(
+            Uri uri, 
+            Dictionary<string, object> additionalAuthenticationContext = default,
+            CancellationToken cancellationToken = default)
+        {
+            var credential = new DefaultAzureCredential();
+            var tokenResult = await credential.GetTokenAsync(new Azure.Core.TokenRequestContext(new string[] { "https://graph.microsoft.com" }));
+
+            var token = tokenResult.Token;
+
+            // get the token and return it in your own way
+            return token;
+        }
+
+        public AllowedHostsValidator AllowedHostsValidator { get; }
     }
 }
