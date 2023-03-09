@@ -10,8 +10,14 @@ Console.WriteLine("Hello Microsoft Graph demo!\n");
 
 GraphServiceClient graphClient = await GraphClientHelper.InitializeGraphClientWithMsiAsync();
 
-// User
+// Users
 await Users.DisplayLoggedInUserInfoAsync(graphClient, writeJsonObjectsToOutput);
+
+// Display number of users
+await Users.DisplayNumberOfUsersAsync(graphClient);
+
+// Display all users with page iterator
+await Users.DisplayUsersAsync(graphClient, writeJsonObjectsToOutput);
 
 // Show random user (maybe doesn't exist) to test retry functionality.
 ////await Users.DisplayUserInfoAsync(graphClient, Guid.NewGuid().ToString(), writeJsonObjectsToOutput);
