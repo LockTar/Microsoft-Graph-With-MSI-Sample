@@ -48,6 +48,11 @@ await Applications.ListApplicationsAsync(graphClient, writeJsonObjectsToOutput);
 
 WriteSectionDevider();
 
+// Organization branding
+await OrganizationBranding.DisplayBrandingAsync(graphClient, writeJsonObjectsToOutput);
+
+WriteSectionDevider();
+
 Console.WriteLine("Bye!!!\n");
 
 static void WriteSectionDevider()
