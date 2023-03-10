@@ -1,7 +1,5 @@
 ﻿using Core.Helpers;
 using Microsoft.Graph;
-using Microsoft.Graph.Models;
-using Microsoft.Graph.Models.ODataErrors;
 
 namespace Core.Graph
 {
@@ -9,9 +7,13 @@ namespace Core.Graph
     {
         public static async Task DisplayBrandingAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput = true)
         {
-            var result = await graphClient.Organization
+            var result = await graphClient.Organization["f6f46aaf-ecdb-47b2-a816-cdc942b1b411"]
+                .Branding
                 .GetAsync(requestConfig =>
-                    requestConfig.QueryParameters.Expand = new string[] { "branding" });
+                {
+                    //requestConfig.QueryParameters.Select = new string[] { "branding" };
+                    //requestConfig.QueryParameters.Expand = new string[] { "branding" };
+                });
 
             if (writeJsonObjectsToOutput)
             {
