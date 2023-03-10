@@ -9,8 +9,8 @@ bool writeJsonObjectsToOutput = false;
 
 Console.WriteLine("Hello Microsoft Graph demo!\n");
 
-////GraphServiceClient graphClient = await GraphClientHelper.InitializeGraphClientWithMsiAsync();
-GraphServiceClient graphClient = await GraphClientHelper.InitializeGraphClientWithClientCredentialsAsync();
+GraphServiceClient graphClient = await GraphClientHelper.InitializeGraphClientWithMsiAsync();
+//GraphServiceClient graphClient = await GraphClientHelper.InitializeGraphClientWithClientCredentialsAsync();
 
 // Users
 await Users.DisplayLoggedInUserInfoAsync(graphClient, writeJsonObjectsToOutput);
