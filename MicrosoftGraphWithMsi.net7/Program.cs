@@ -42,7 +42,7 @@ WriteSectionDevider();
 await Applications.ListApplicationsAsync(graphClient, writeJsonObjectsToOutput);
 ////Application application = await Applications.GetOrCreateApplicationIfNotExistAsync(graphClient, applicationName);
 ////await Applications.DisplayApplicationAsync(graphClient, application, writeJsonObjectsToOutput);
-////await Applications.AddApplicationOwnerAsync(graphClient, application, "d7fa49d4-38d8-427b-9199-193a5e0923f4");
+////await Applications.AddApplicationOwnerAsync(graphClient, application, "bf41f70e-be3c-473a-b594-1e7c57b28da4"");
 ////await Applications.ListApplicationOwnersAsync(graphClient, application, writeJsonObjectsToOutput);
 ////await Applications.DeleteApplicationAsync(graphClient, application);
 
