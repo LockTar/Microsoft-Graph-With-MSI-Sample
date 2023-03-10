@@ -1,7 +1,6 @@
 ﻿using Azure.Identity;
 using Microsoft.Graph;
 using Microsoft.Kiota.Abstractions.Authentication;
-using System.Net.Http.Headers;
 
 namespace Core.Helpers
 {
@@ -17,7 +16,8 @@ namespace Core.Helpers
             Console.WriteLine(token);
             Console.WriteLine("\n\n");
 
-            var authenticationProvider = new BaseBearerTokenAuthenticationProvider(new TokenProvider());
+            TokenProvider accessTokenProvider = new TokenProvider(credential);
+            var authenticationProvider = new BaseBearerTokenAuthenticationProvider(accessTokenProvider);
             var graphServiceClient = new GraphServiceClient(authenticationProvider);
 
             //var graphServiceClient = new GraphServiceClient(
@@ -36,17 +36,22 @@ namespace Core.Helpers
 
     public class TokenProvider : IAccessTokenProvider
     {
+        private readonly DefaultAzureCredential _credential;
+
+        public TokenProvider(DefaultAzureCredential credential)
+        {
+            _credential = credential;
+        }
+
         public async Task<string> GetAuthorizationTokenAsync(
             Uri uri, 
             Dictionary<string, object> additionalAuthenticationContext = default,
             CancellationToken cancellationToken = default)
-        {
-            var credential = new DefaultAzureCredential();
-            var tokenResult = await credential.GetTokenAsync(new Azure.Core.TokenRequestContext(new string[] { "https://graph.microsoft.com" }));
+        {            
+            var tokenResult = await _credential.GetTokenAsync(new Azure.Core.TokenRequestContext(new string[] { "https://graph.microsoft.com" }));
 
             var token = tokenResult.Token;
 
-            // get the token and return it in your own way
             return token;
         }
 
