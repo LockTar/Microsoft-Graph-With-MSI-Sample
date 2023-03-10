@@ -32,6 +32,37 @@ namespace Core.Helpers
 
             return graphServiceClient;
         }
+
+        public static async Task<GraphServiceClient> InitializeGraphClientWithClientCredentialsAsync()
+        {
+            // The client credentials flow requires that you request the
+            // /.default scope, and preconfigure your permissions on the
+            // app registration in Azure. An administrator must grant consent
+            // to those permissions beforehand.
+            var scopes = new[] { "https://graph.microsoft.com/.default" };
+
+            // Multi-tenant apps can use "common",
+            // single-tenant apps must use the tenant ID from the Azure portal
+            var tenantId = "";
+
+            // Values from app registration
+            var clientId = "";
+            var clientSecret = "";
+
+            // using Azure.Identity;
+            var options = new TokenCredentialOptions
+            {
+                AuthorityHost = AzureAuthorityHosts.AzurePublicCloud
+            };
+
+            // https://learn.microsoft.com/dotnet/api/azure.identity.clientsecretcredential
+            var clientSecretCredential = new ClientSecretCredential(
+                tenantId, clientId, clientSecret, options);
+
+            var graphClient = new GraphServiceClient(clientSecretCredential, scopes);
+
+            return graphClient;
+        }
     }
 
     public class TokenProvider : IAccessTokenProvider
