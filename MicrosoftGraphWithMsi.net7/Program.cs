@@ -10,16 +10,16 @@ bool writeJsonObjectsToOutput = false;
 Console.WriteLine("Hello Microsoft Graph demo!\n");
 
 GraphServiceClient graphClient = await GraphClientHelper.InitializeGraphClientWithMsiAsync();
-//GraphServiceClient graphClient = await GraphClientHelper.InitializeGraphClientWithClientCredentialsAsync();
+////GraphServiceClient graphClient = await GraphClientHelper.InitializeGraphClientWithClientCredentialsAsync();
 
 // Users
 await Users.DisplayLoggedInUserInfoAsync(graphClient, writeJsonObjectsToOutput);
 
-// Display number of users
+// Display number of users in tenant
 await Users.DisplayNumberOfUsersAsync(graphClient);
 
 // Display all users with page iterator
-await Users.DisplayUsersAsync(graphClient, writeJsonObjectsToOutput);
+////await Users.DisplayUsersAsync(graphClient, writeJsonObjectsToOutput);
 
 // Show random user (maybe doesn't exist) to test retry functionality.
 ////await Users.DisplayUserInfoAsync(graphClient, Guid.NewGuid().ToString(), writeJsonObjectsToOutput);
