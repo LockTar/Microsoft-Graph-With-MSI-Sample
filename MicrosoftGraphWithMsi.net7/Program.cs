@@ -5,12 +5,15 @@ using Microsoft.Graph.Models;
 
 const string groupName = "AAATest";
 const string applicationName = "AAATestApplication";
+
 bool writeJsonObjectsToOutput = false;
+bool enableHttpRequestLogger = false;
 
 Console.WriteLine("Hello Microsoft Graph demo!\n");
 
-GraphServiceClient graphClient = await GraphClientHelper.InitializeGraphClientWithMsiAsync();
-////GraphServiceClient graphClient = await GraphClientHelper.InitializeGraphClientWithClientCredentialsAsync();
+var graphClient = await GraphClientHelper.InitializeGraphClientWithMsiAsync(enableHttpRequestLogger);
+//var graphClient = await GraphClientHelper.InitializeGraphClientWithClientCredentialsAsync(enableHttpRequestLogger);
+//var graphClientBeta = await GraphClientHelper.InitializeGraphBetaClientWithClientCredentialsAsync(enableHttpRequestLogger);
 
 // Users
 await Users.DisplayLoggedInUserInfoAsync(graphClient, writeJsonObjectsToOutput);
@@ -46,10 +49,10 @@ await Applications.ListApplicationsAsync(graphClient, writeJsonObjectsToOutput);
 ////await Applications.ListApplicationOwnersAsync(graphClient, application, writeJsonObjectsToOutput);
 ////await Applications.DeleteApplicationAsync(graphClient, application);
 
-WriteSectionDevider();
+////WriteSectionDevider();
 
-// Organization branding
-await OrganizationBranding.DisplayBrandingAsync(graphClient, writeJsonObjectsToOutput);
+////// Organization branding
+////await OrganizationBranding.DisplayBrandingAsync(graphClient, writeJsonObjectsToOutput);
 
 WriteSectionDevider();
 
