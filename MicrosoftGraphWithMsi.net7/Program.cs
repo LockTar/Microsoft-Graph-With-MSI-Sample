@@ -1,6 +1,7 @@
 ﻿using Core.Graph;
 using Core.Helpers;
 using Microsoft.Graph;
+using Microsoft.Graph.Models;
 
 const string groupName = "AAATest";
 const string applicationName = "AAATestApplication";
@@ -8,7 +9,8 @@ bool writeJsonObjectsToOutput = false;
 
 Console.WriteLine("Hello Microsoft Graph demo!\n");
 
-GraphServiceClient graphClient = await GraphClientHelper.InitializeGraphClientWithMsiAsync();
+////GraphServiceClient graphClient = await GraphClientHelper.InitializeGraphClientWithMsiAsync();
+GraphServiceClient graphClient = await GraphClientHelper.InitializeGraphClientWithClientCredentialsAsync();
 
 // Users
 await Users.DisplayLoggedInUserInfoAsync(graphClient, writeJsonObjectsToOutput);
