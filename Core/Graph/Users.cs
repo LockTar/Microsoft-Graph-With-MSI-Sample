@@ -1,5 +1,6 @@
-﻿using Microsoft.Graph;
-using Core.Helpers;
+﻿using Core.Helpers;
+using Microsoft.Graph;
+using Microsoft.Graph.Models;
 using System.Net.Http.Headers;
 
 namespace Core.Graph
@@ -10,9 +11,7 @@ namespace Core.Graph
 
         public static async Task DisplayLoggedInUserInfoAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput = true)
         {
-            User user = await graphClient.Me
-                            .Request()
-                            .GetAsync();
+            User? user = await graphClient.Me.GetAsync();
 
             Console.WriteLine("Logged in user:");
             PrintUserInformation(user, writeJsonObjectsToOutput);
@@ -22,32 +21,76 @@ namespace Core.Graph
         {
             const int MaxRetry = 5; // So number of call are (MaxRetry + 1)
 
+
             User user = await graphClient.Users[userId]
-                            .Request()
-                            .WithMaxRetry(MaxRetry)
-                            .WithShouldRetry((delay, attempt, httpResponse) =>
-                            {
-                                Console.WriteLine($"Request returned status code {httpResponse.StatusCode}");
+                            ////.WithMaxRetry(MaxRetry)
+                            ////.WithShouldRetry((delay, attempt, httpResponse) =>
+                            ////{
+                            ////    Console.WriteLine($"Request returned status code {httpResponse.StatusCode}");
 
-                                // Add more status codes here or change your if statement...
-                                if (httpResponse.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                                    return false;
+                            ////    // Add more status codes here or change your if statement...
+                            ////    if (httpResponse.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                            ////        return false;
 
-                                double delayInSeconds = CalculateDelay(httpResponse, attempt, delay);
+                            ////    double delayInSeconds = CalculateDelay(httpResponse, attempt, delay);
 
-                                if (attempt == 0)
-                                    Console.WriteLine($"Request failed, let's retry after a delay of {delayInSeconds} seconds");
-                                else if (attempt == MaxRetry)
-                                    Console.WriteLine($"This was the last retry attempt {attempt}");
-                                else
-                                    Console.WriteLine($"This was retry attempt {attempt}, let's retry after a delay of {delayInSeconds} seconds");
+                            ////    if (attempt == 0)
+                            ////        Console.WriteLine($"Request failed, let's retry after a delay of {delayInSeconds} seconds");
+                            ////    else if (attempt == MaxRetry)
+                            ////        Console.WriteLine($"This was the last retry attempt {attempt}");
+                            ////    else
+                            ////        Console.WriteLine($"This was retry attempt {attempt}, let's retry after a delay of {delayInSeconds} seconds");
 
-                                return true;
-                            })
+                            ////    return true;
+                            ////})
                             .GetAsync();
 
             Console.WriteLine("User information:");
             PrintUserInformation(user, writeJsonObjectsToOutput);
+        }
+
+        public static async Task DisplayNumberOfUsersAsync(GraphServiceClient graphClient)//, bool writeJsonObjectsToOutput = true)
+        {
+            var count = await graphClient.Users.Count
+                .GetAsync(requestConfiguration => requestConfiguration.Headers.Add("ConsistencyLevel", "eventual"));
+
+            Console.WriteLine($"Number of users in the tenant: {count}");
+        }
+
+        public static async Task DisplayUsersAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput = true)
+        {
+            var users = await graphClient
+                .Users
+                .GetAsync(requestConfiguration =>
+                {
+                    requestConfiguration.QueryParameters.Top = 2; // pages of 2 for sample purpose
+                    requestConfiguration.QueryParameters.Select = new string[] { "id", "displayName", "createdDateTime" };
+                });
+
+            var pageIterator = PageIterator<User, UserCollectionResponse>
+                .CreatePageIterator(
+                    graphClient,
+                    users,
+                    // Callback executed for each item in
+                    // the collection
+                    (i) =>
+                    {
+                        PrintUserInformation(i, writeJsonObjectsToOutput);
+                        //Console.WriteLine(i.Id + " " + i.DisplayName);
+                        return true;
+                    }
+                    //,
+                    //// Used to configure subsequent page
+                    //// requests
+                    //(req) =>
+                    //{
+                    //    // Re-add the header to subsequent requests
+                    //    //req.Headers.Add("Prefer", "outlook.body-content-type=\"text\"");
+                    //    return req;
+                    //}
+                );
+
+            await pageIterator.IterateAsync();
         }
 
         /// <summary>

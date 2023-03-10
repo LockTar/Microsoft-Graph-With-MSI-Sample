@@ -1,11 +1,7 @@
 ﻿using Microsoft.Graph;
 using Core.Helpers;
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Graph.Models;
+using Microsoft.Graph.Models.ODataErrors;
 
 namespace Core.Graph
 {
@@ -13,9 +9,7 @@ namespace Core.Graph
     {
         public static async Task<Application> DisplayApplicationAsync(GraphServiceClient graphClient, Application application, bool writeJsonObjectsToOutput = true)
         {
-            application = await graphClient.Applications[application.Id]
-                            .Request()
-                            .GetAsync();
+            application = await graphClient.Applications[application.Id].GetAsync();
 
             if (writeJsonObjectsToOutput)
             {
@@ -29,51 +23,51 @@ namespace Core.Graph
 
         public static async Task ListApplicationsAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput)
         {
-            var applications = await graphClient.Applications
-                            .Request()
-                            .GetAsync();
+            var applicationCollectionResponse = await graphClient.Applications.GetAsync();
 
             Console.WriteLine();
-            Console.WriteLine($"Number of applications on first page {applications.Count}");
+            Console.WriteLine($"Number of applications on first page {applicationCollectionResponse.Value.Count}");
 
             if (writeJsonObjectsToOutput)
             {
                 Console.WriteLine();
                 Console.WriteLine("Applications (first page) in JSON:");
-                Console.WriteLine(applications.CurrentPage.Select(s => new { s.DisplayName, s.AppId, s.Id }).ToFormattedJson());
+                Console.WriteLine(applicationCollectionResponse.Value.Select(s => new { s.DisplayName, s.AppId, s.Id }).ToFormattedJson());
             }
         }
 
         public static async Task<Application> GetOrCreateApplicationIfNotExistAsync(GraphServiceClient graphClient, string applicationName)
         {
-            Application application = null;
+            Application? application = null;
 
-            var applicationsCollectionPage = await graphClient.Applications
-                            .Request()
-                            .Filter($"displayName eq '{applicationName}'")
-                            .GetAsync();
+            var applicationCollectionResponse = await graphClient.Applications
+                            .GetAsync(requestConfig =>
+                            {
+                                requestConfig.QueryParameters.Select = new string[] { "id", "displayName" };
+                                requestConfig.QueryParameters.Filter = $"displayName eq '{applicationName}'";
+                            });
 
-            if (applicationsCollectionPage.CurrentPage.Count > 1)
+            if (applicationCollectionResponse.Value.Count > 1)
             {
                 throw new InvalidProgramException("Multiple applications with same name!!!!");
             }
-            else if (applicationsCollectionPage.CurrentPage.Count == 0)
+            else if (applicationCollectionResponse.Value.Count == 0)
             {
+                Application newApplication = new()
+                {
+                    DisplayName = applicationName,
+                    Description = "This is a test application"
+                };
+
                 // Application doesn't exist. Create it.
                 Console.WriteLine($"Create application '{applicationName}'");
-                application = await graphClient.Applications
-                            .Request()
-                            .AddAsync(new Application()
-                            {
-                                DisplayName = applicationName,
-                                Description = "This is a test application"
-                            });
+                application = await graphClient.Applications.PostAsync(newApplication);
                 Console.WriteLine($"Created application '{application.DisplayName}' with id {application.Id}");
             }
             else
             {
                 // Application already exist.
-                application = applicationsCollectionPage.CurrentPage[0];
+                application = applicationCollectionResponse.Value.First();
                 Console.WriteLine($"Application '{application.DisplayName}' with id {application.Id} found in the AAD.");
             }
 
@@ -89,25 +83,26 @@ namespace Core.Graph
         {
             Console.WriteLine($"\nGoing to delete application '{application.DisplayName}' with id {application.Id}");
 
-            await graphClient.Applications[application.Id]
-                            .Request()
-                            .DeleteAsync();
+            await graphClient.Applications[application.Id].DeleteAsync();
 
             Console.WriteLine($"\nApplication '{application.DisplayName}' deleted!");
         }
 
         public static async Task ListApplicationOwnersAsync(GraphServiceClient graphClient, Application application, bool writeJsonObjectsToOutput)
         {
+            var result = await graphClient.Applications[application.Id]
+                            .GetAsync(requestConfig =>
+                            {
+                                requestConfig.QueryParameters.Select = new string[] { "id", "displayName" };
+                                requestConfig.QueryParameters.Expand = new string[] { "owners" };
+                            });
+
+            Console.WriteLine();
+            Console.WriteLine($"Application owners (first page) in JSON ({result.Owners.Count})");
+
             if (writeJsonObjectsToOutput)
             {
-                application = await graphClient.Applications[application.Id]
-                                .Request()
-                                .Expand("owners")
-                                .GetAsync();
-
-                Console.WriteLine();
-                Console.WriteLine("Application owners (first page) in JSON:");
-                Console.WriteLine(application.Owners.CurrentPage.ToFormattedJson());
+                Console.WriteLine(result.Owners.ToFormattedJson());
             }
         }
 
@@ -115,33 +110,36 @@ namespace Core.Graph
         {
             // Get user to add
             var user = await graphClient.Users[ownerToAdd]
-             .Request()
-               .Select("id")
-                   .GetAsync();
+                .GetAsync(requestConfig =>
+                    requestConfig.QueryParameters.Select = new string[] { "id", "displayName" });
 
             try
             {
                 var ownerOfApplication = await graphClient
                     .Applications[application.Id]
-                    .Owners[ownerToAdd]
-                    .Request()
-                    .GetAsync();
+                    .Owners
+                    .GetAsync(requestConfig =>
+                    {
+                        requestConfig.QueryParameters.Filter = $"id eq '{ownerToAdd}'";
+                    });
 
-                Console.WriteLine($"User {user.Id} already owner of application '{application.DisplayName}'");
+                Console.WriteLine($"User {user.DisplayName} - {user.Id} already owner of application '{application.DisplayName}'");
             }
-            catch (ServiceException ex)
+            catch (ODataError odataError) when (odataError.Error.Code.Equals("Request_ResourceNotFound"))
             {
-                if (ex.StatusCode == HttpStatusCode.NotFound)
-                {
-                    Console.WriteLine($"Add user {user.Id} as owner to application '{application.DisplayName}'");
-                    await graphClient.Applications[application.Id]
-                        .Owners
-                        .References
-                        .Request()
-                        .AddAsync(user);
+                //Console.WriteLine(odataError.Error.Code);
+                //Console.WriteLine(odataError.Error.Message);
 
-                    Console.WriteLine($"User {user.Id} added as owner to application '{application.DisplayName}'");
-                }
+                Console.WriteLine($"Add user {user.Id} as owner to application '{application.DisplayName}'");
+                ReferenceCreate referenceCreate = new ReferenceCreate();
+                referenceCreate.OdataId = "https://graph.microsoft.com/v1.0/directoryObjects/" + user.Id;
+
+                await graphClient.Applications[application.Id]
+                    .Owners
+                    .Ref
+                    .PostAsync(referenceCreate);
+
+                Console.WriteLine($"User {user.Id} added as owner to application '{application.DisplayName}'");
             }
         }
     }

@@ -1,6 +1,7 @@
-﻿using Microsoft.Graph;
-using Core.Helpers;
-using System.Net;
+﻿using Core.Helpers;
+using Microsoft.Graph;
+using Microsoft.Graph.Models;
+using Microsoft.Graph.Models.ODataErrors;
 
 namespace Core.Graph
 {
@@ -8,9 +9,7 @@ namespace Core.Graph
     {
         public static async Task<Group> DisplayGroupAsync(GraphServiceClient graphClient, Group group, bool writeJsonObjectsToOutput = true)
         {
-            group = await graphClient.Groups[group.Id]
-                            .Request()
-                            .GetAsync();
+            group = await graphClient.Groups[group.Id].GetAsync();
 
             if (writeJsonObjectsToOutput)
             {
@@ -24,54 +23,54 @@ namespace Core.Graph
 
         public static async Task ListGroupsAsync(GraphServiceClient graphClient, bool writeJsonObjectsToOutput)
         {
-            var groups = await graphClient.Groups
-                            .Request()
-                            .GetAsync();
+            var groupCollectionResponse = await graphClient.Groups.GetAsync();
 
             Console.WriteLine();
-            Console.WriteLine($"Number of groups on first page are: {groups.Count}");
+            Console.WriteLine($"Number of groups on first page are: {groupCollectionResponse.Value.Count}");
 
             if (writeJsonObjectsToOutput)
             {
                 Console.WriteLine();
                 Console.WriteLine("Groups (first page) in JSON:");
-                Console.WriteLine(groups.CurrentPage.Select(s => new { s.DisplayName, s.Id }).ToFormattedJson());
+                Console.WriteLine(groupCollectionResponse.Value.Select(s => new { s.DisplayName, s.Id }).ToFormattedJson());
             }
         }
 
         public static async Task<Group> GetOrCreateGroupIfNotExistAsync(GraphServiceClient graphClient, string groupName)
         {
-            Group group = null;
+            Group? group = null;
 
-            var groupsCollectionPage = await graphClient.Groups
-                            .Request()
-                            .Filter($"displayName eq '{groupName}'")
-                            .GetAsync();
+            var groupCollectionResponse = await graphClient.Groups
+                            .GetAsync(requestConfig =>
+                            {
+                                requestConfig.QueryParameters.Select = new string[] { "id", "displayName" };
+                                requestConfig.QueryParameters.Filter = $"displayName eq '{groupName}'";
+                            });
 
-            if (groupsCollectionPage.CurrentPage.Count > 1)
+            if (groupCollectionResponse.Value.Count > 1)
             {
                 throw new InvalidProgramException("Multiple groups with same name!!!!");
             }
-            else if (groupsCollectionPage.CurrentPage.Count == 0)
+            else if (groupCollectionResponse.Value.Count == 0)
             {
+                var newGroup = new Group()
+                {
+                    DisplayName = groupName,
+                    Description = "This is a test group",
+                    MailEnabled = false,
+                    MailNickname = groupName,
+                    SecurityEnabled = true,
+                };
+
                 // Group doesn't exist. Create it.
                 Console.WriteLine($"Create group '{groupName}'");
-                group = await graphClient.Groups
-                            .Request()
-                            .AddAsync(new Group()
-                            {
-                                DisplayName = groupName,
-                                Description = "This is a test group",
-                                SecurityEnabled = true,
-                                MailEnabled = false,
-                                MailNickname = groupName
-                            });
+                group = await graphClient.Groups.PostAsync(newGroup);
                 Console.WriteLine($"Created group '{group.DisplayName}' with id {group.Id}");
             }
             else
             {
                 // Group already exist.
-                group = groupsCollectionPage.CurrentPage[0];
+                group = groupCollectionResponse.Value.First();
                 Console.WriteLine($"Group '{group.DisplayName}' with id {group.Id} found in the AAD.");
             }
 
@@ -87,40 +86,41 @@ namespace Core.Graph
         {
             Console.WriteLine($"\nGoing to delete group '{group.DisplayName}' with id {group.Id}");
 
-            await graphClient.Groups[group.Id]
-                            .Request()
-                            .DeleteAsync();
+            await graphClient.Groups[group.Id].DeleteAsync();
 
             Console.WriteLine($"\nGroup '{group.DisplayName}' deleted!");
         }
 
         public static async Task ListGroupOwnersAsync(GraphServiceClient graphClient, Group group, bool writeJsonObjectsToOutput)
         {
+            var result = await graphClient.Groups[group.Id]
+                            .GetAsync(requestConfig =>
+                            {
+                                requestConfig.QueryParameters.Select = new string[] { "id", "displayName" };
+                                requestConfig.QueryParameters.Expand = new string[] { "owners" };
+                            });
+
+            Console.WriteLine();
+            Console.WriteLine($"Group owners (first page) in JSON ({result.Owners.Count})");
+
             if (writeJsonObjectsToOutput)
             {
-                group = await graphClient.Groups[group.Id]
-                                .Request()
-                                .Expand("owners")
-                                .GetAsync();
-
-                Console.WriteLine();
-                Console.WriteLine("Group owners (first page) in JSON:");
-                Console.WriteLine(group.Owners.CurrentPage.ToFormattedJson());
+                Console.WriteLine(result.Owners.ToFormattedJson());
             }
         }
 
         public static async Task ListGroupMembersAsync(GraphServiceClient graphClient, Group group, bool writeJsonObjectsToOutput)
         {
+            var result = await graphClient.Groups[group.Id]
+                            .GetAsync(requestConfig =>
+                                requestConfig.QueryParameters.Expand = new string[] { "members" });
+
+            Console.WriteLine();
+            Console.WriteLine($"Group members (first page) in JSON ({result.Members.Count})");
+
             if (writeJsonObjectsToOutput)
             {
-                group = await graphClient.Groups[group.Id]
-                                .Request()
-                                .Expand("members")
-                                .GetAsync();
-
-                Console.WriteLine();
-                Console.WriteLine("Group members (first page) in JSON:");
-                Console.WriteLine(group.Members.CurrentPage.ToFormattedJson());
+                Console.WriteLine(result.Members.ToFormattedJson());
             }
         }
 
@@ -128,33 +128,36 @@ namespace Core.Graph
         {
             // Get user to add
             var user = await graphClient.Users[ownerToAdd]
-             .Request()
-               .Select("id")
-                   .GetAsync();
+                .GetAsync(requestConfig =>
+                    requestConfig.QueryParameters.Select = new string[] { "id", "displayName" });
 
             try
             {
                 var ownerOfGroup = await graphClient
                     .Groups[group.Id]
-                    .Owners[ownerToAdd]
-                    .Request()
-                    .GetAsync();
+                    .Owners
+                    .GetAsync(requestConfig =>
+                    {
+                        requestConfig.QueryParameters.Filter = $"id eq '{ownerToAdd}'";
+                    });
 
-                Console.WriteLine($"User {user.Id} already owner of group '{group.DisplayName}'");
+                Console.WriteLine($"User {user.DisplayName} - {user.Id} already owner of group '{group.DisplayName}'");
             }
-            catch (ServiceException ex)
+            catch (ODataError odataError) when (odataError.Error.Code.Equals("Request_ResourceNotFound"))
             {
-                if (ex.StatusCode == HttpStatusCode.NotFound)
-                {
-                    Console.WriteLine($"Add user {user.Id} as owner to group '{group.DisplayName}'");
-                    await graphClient.Groups[group.Id]
-                        .Owners
-                        .References
-                        .Request()
-                        .AddAsync(user);
+                //Console.WriteLine(odataError.Error.Code);
+                //Console.WriteLine(odataError.Error.Message);
 
-                    Console.WriteLine($"User {user.Id} added as owner to group '{group.DisplayName}'");
-                }
+                Console.WriteLine($"Add user {user.Id} as owner to group '{group.DisplayName}'");
+                ReferenceCreate referenceCreate = new ReferenceCreate();
+                referenceCreate.OdataId = "https://graph.microsoft.com/v1.0/directoryObjects/" + user.Id;
+
+                await graphClient.Groups[group.Id]
+                    .Owners
+                    .Ref
+                    .PostAsync(referenceCreate);
+
+                Console.WriteLine($"User {user.Id} added as owner to group '{group.DisplayName}'");
             }
         }
 
@@ -162,33 +165,36 @@ namespace Core.Graph
         {
             // Get user to add
             var user = await graphClient.Users[memberToAdd]
-             .Request()
-               .Select("id")
-                   .GetAsync();
+                .GetAsync(requestConfig =>
+                    requestConfig.QueryParameters.Select = new string[] { "id", "displayName" });
 
             try
             {
                 var memberOfGroup = await graphClient
                     .Groups[group.Id]
-                    .Members[memberToAdd]
-                    .Request()
-                    .GetAsync();
+                    .Members
+                    .GetAsync(requestConfig =>
+                    {
+                        requestConfig.QueryParameters.Filter = $"id eq '{memberToAdd}'";
+                    });
 
                 Console.WriteLine($"User {user.Id} already member of group '{group.DisplayName}'");
             }
-            catch (ServiceException ex)
+            catch (ODataError odataError) when (odataError.Error.Code.Equals("Request_ResourceNotFound"))
             {
-                if (ex.StatusCode == HttpStatusCode.NotFound)
-                {
-                    Console.WriteLine($"Add user {user.Id} as member to group '{group.DisplayName}'");
-                    await graphClient.Groups[group.Id]
-                        .Members
-                        .References
-                        .Request()
-                        .AddAsync(user);
+                //Console.WriteLine(odataError.Error.Code);
+                //Console.WriteLine(odataError.Error.Message);
 
-                    Console.WriteLine($"User {user.Id} added as member to group '{group.DisplayName}'");
-                }
+                Console.WriteLine($"Add user {user.Id} as member to group '{group.DisplayName}'");
+                ReferenceCreate referenceCreate = new ReferenceCreate();
+                referenceCreate.OdataId = "https://graph.microsoft.com/v1.0/directoryObjects/" + user.Id;
+
+                await graphClient.Groups[group.Id]
+                    .Members
+                    .Ref
+                    .PostAsync(referenceCreate);
+
+                Console.WriteLine($"User {user.Id} added as member to group '{group.DisplayName}'");
             }
         }
     }
