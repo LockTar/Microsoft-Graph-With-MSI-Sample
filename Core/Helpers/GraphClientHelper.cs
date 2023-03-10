@@ -35,33 +35,6 @@ namespace Core.Helpers
             return graphClient;
         }
 
-        private static void SetupClientSecretCredentialAndScopes(out string[] scopes, out ClientSecretCredential clientSecretCredential)
-        {
-            // The client credentials flow requires that you request the
-            // /.default scope, and preconfigure your permissions on the
-            // app registration in Azure. An administrator must grant consent
-            // to those permissions beforehand.
-            scopes = new[] { "https://graph.microsoft.com/.default" };
-
-            // Multi-tenant apps can use "common",
-            // single-tenant apps must use the tenant ID from the Azure portal
-            var tenantId = TenantId;
-
-            // Values from app registration
-            var clientId = ClientId;
-            var clientSecret = ClientSecret;
-
-            // using Azure.Identity;
-            var options = new TokenCredentialOptions
-            {
-                AuthorityHost = AzureAuthorityHosts.AzurePublicCloud
-            };
-
-            // https://learn.microsoft.com/dotnet/api/azure.identity.clientsecretcredential
-            clientSecretCredential = new ClientSecretCredential(
-                tenantId, clientId, clientSecret, options);
-        }
-
         public static async Task<GraphServiceClient> InitializeGraphClientWithClientCredentialsAsync(bool enableHttpRequestHandler)
         {
             string[] scopes;
@@ -94,6 +67,33 @@ namespace Core.Helpers
             //var graphClient = new Microsoft.Graph.Beta.GraphServiceClient(clientSecretCredential, scopes);
 
             return graphClient;
+        }
+
+        private static void SetupClientSecretCredentialAndScopes(out string[] scopes, out ClientSecretCredential clientSecretCredential)
+        {
+            // The client credentials flow requires that you request the
+            // /.default scope, and preconfigure your permissions on the
+            // app registration in Azure. An administrator must grant consent
+            // to those permissions beforehand.
+            scopes = new[] { "https://graph.microsoft.com/.default" };
+
+            // Multi-tenant apps can use "common",
+            // single-tenant apps must use the tenant ID from the Azure portal
+            var tenantId = TenantId;
+
+            // Values from app registration
+            var clientId = ClientId;
+            var clientSecret = ClientSecret;
+
+            // using Azure.Identity;
+            var options = new TokenCredentialOptions
+            {
+                AuthorityHost = AzureAuthorityHosts.AzurePublicCloud
+            };
+
+            // https://learn.microsoft.com/dotnet/api/azure.identity.clientsecretcredential
+            clientSecretCredential = new ClientSecretCredential(
+                tenantId, clientId, clientSecret, options);
         }
 
         private static HttpClient GetHttpClientWithDefaultAndCustomHandlers(bool enableHttpRequestHandler)
