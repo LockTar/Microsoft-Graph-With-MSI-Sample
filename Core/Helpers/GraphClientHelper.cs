@@ -15,6 +15,8 @@ namespace Core.Helpers
         private const string ClientId = "";
         private const string ClientSecret = "";
 
+        private const bool BypassCustomHandlerIssue622 = false; // https://github.com/microsoftgraph/msgraph-sdk-dotnet-core/issues/622
+
         public static async Task<GraphServiceClient> InitializeGraphClientWithMsiAsync(bool enableHttpRequestHandler)
         {
             ////DefaultAzureCredentialOptions options = new DefaultAzureCredentialOptions()
@@ -54,15 +56,21 @@ namespace Core.Helpers
             ClientSecretCredential clientSecretCredential;
             SetupClientSecretCredentialAndScopes(out scopes, out clientSecretCredential);
 
-            var authProvider = new AzureIdentityAuthenticationProvider(clientSecretCredential, scopes);
+            if (!BypassCustomHandlerIssue622)
+            {
+                //var authProvider = new AzureIdentityAuthenticationProvider(clientSecretCredential, scopes);
+                var authProvider = new Microsoft.Graph.Authentication.AzureIdentityAuthenticationProvider(clientSecretCredential, scopes);
 
             HttpClient httpClient = GetHttpClientWithDefaultAndCustomHandlers(enableHttpRequestHandler);
 
             var graphClient = new GraphServiceClient(httpClient, authProvider);
-
-            //var graphClient = new GraphServiceClient(clientSecretCredential, scopes);
-
+                return graphClient;
+            }
+            else
+            {
+                var graphClient = new GraphServiceClient(clientSecretCredential, scopes);
             return graphClient;
+        }
         }
 
         public static async Task<Microsoft.Graph.Beta.GraphServiceClient> InitializeGraphBetaClientWithClientCredentialsAsync(bool enableHttpRequestHandler)
@@ -71,15 +79,20 @@ namespace Core.Helpers
             ClientSecretCredential clientSecretCredential;
             SetupClientSecretCredentialAndScopes(out scopes, out clientSecretCredential);
 
+            if (!BypassCustomHandlerIssue622)
+            {
             var authProvider = new AzureIdentityAuthenticationProvider(clientSecretCredential, scopes);
 
             HttpClient httpClient = GetHttpClientWithDefaultAndCustomHandlers(enableHttpRequestHandler);
 
             var graphClient = new Microsoft.Graph.Beta.GraphServiceClient(httpClient, authProvider);
-
-            //var graphClient = new Microsoft.Graph.Beta.GraphServiceClient(clientSecretCredential, scopes);
-
+                return graphClient;
+            }
+            else
+            {
+                var graphClient = new Microsoft.Graph.Beta.GraphServiceClient(clientSecretCredential, scopes);
             return graphClient;
+        }
         }
 
         private static void SetupClientSecretCredentialAndScopes(out string[] scopes, out ClientSecretCredential clientSecretCredential)
