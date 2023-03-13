@@ -5,6 +5,7 @@ using Microsoft.Graph.Models;
 
 const string groupName = "AAATest";
 const string applicationName = "AAATestApplication";
+const string TestOrganizationId = "f6f46aaf-ecdb-47b2-a816-cdc942b1b411";
 
 bool writeJsonObjectsToOutput = false;
 bool enableHttpRequestLogger = false;
@@ -51,8 +52,9 @@ await Applications.ListApplicationsAsync(graphClient, writeJsonObjectsToOutput);
 
 ////WriteSectionDevider();
 
-////// Organization branding
-////await OrganizationBranding.DisplayBrandingAsync(graphClient, writeJsonObjectsToOutput);
+// Organization branding
+////await OrganizationBranding.DisplayBrandingAsync(graphClient, TestOrganizationId, writeJsonObjectsToOutput);
+////await OrganizationBranding.UpdateBrandingAsync(graphClient, TestOrganizationId, writeJsonObjectsToOutput);
 
 WriteSectionDevider();
 
