@@ -17,6 +17,19 @@ namespace Core.Helpers
 
         public static async Task<GraphServiceClient> InitializeGraphClientWithMsiAsync(bool enableHttpRequestHandler)
         {
+            ////DefaultAzureCredentialOptions options = new DefaultAzureCredentialOptions()
+            ////{
+            ////    ExcludeAzurePowerShellCredential = true,
+            ////    ExcludeEnvironmentCredential = true,
+            ////    ExcludeInteractiveBrowserCredential = true,
+            ////    ExcludeManagedIdentityCredential = true,
+            ////    ExcludeSharedTokenCacheCredential = true,
+            ////    ExcludeVisualStudioCodeCredential = true,
+            ////    ExcludeVisualStudioCredential = true,
+            ////    ExcludeAzureCliCredential = false
+            ////};
+            ////var credential = new DefaultAzureCredential(options);
+            
             var credential = new DefaultAzureCredential();
             var tokenResult = await credential.GetTokenAsync(new Azure.Core.TokenRequestContext(new string[] { "https://graph.microsoft.com" }));
 
