@@ -1,6 +1,8 @@
 ﻿using Core.Helpers;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
+using Microsoft.Kiota.Abstractions;
+using Microsoft.Kiota.Http.HttpClientLibrary.Middleware.Options;
 using System.Net.Http.Headers;
 
 namespace Core.Graph
@@ -19,31 +21,40 @@ namespace Core.Graph
 
         public static async Task DisplayUserInfoAsync(GraphServiceClient graphClient, string userId, bool writeJsonObjectsToOutput = true)
         {
-            const int MaxRetry = 5; // So number of call are (MaxRetry + 1)
+            const int MaxRetry = 5; // So number of call are MaxRetry + 1 (1 is the original call)
 
+            RetryHandlerOption retryHandlerOption = new RetryHandlerOption()
+            {
+                MaxRetry = MaxRetry,
+                ShouldRetry = (delay, attempt, httpResponse) =>
+                {
+                    Console.WriteLine($"Request returned status code {httpResponse.StatusCode}");
 
-            User user = await graphClient.Users[userId]
-                            ////.WithMaxRetry(MaxRetry)
-                            ////.WithShouldRetry((delay, attempt, httpResponse) =>
-                            ////{
-                            ////    Console.WriteLine($"Request returned status code {httpResponse.StatusCode}");
+                    // Add more status codes here or change your if statement...
+                    if (httpResponse.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                        return false;
 
-                            ////    // Add more status codes here or change your if statement...
-                            ////    if (httpResponse.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                            ////        return false;
+                    double delayInSeconds = CalculateDelay(httpResponse, attempt, delay);
 
-                            ////    double delayInSeconds = CalculateDelay(httpResponse, attempt, delay);
+                    if (attempt == 0)
+                        Console.WriteLine($"Request failed, let's retry after a delay of {delayInSeconds} seconds");
+                    else if (attempt == MaxRetry)
+                        Console.WriteLine($"This was the last retry attempt {attempt}");
+                    else
+                        Console.WriteLine($"This was retry attempt {attempt}, let's retry after a delay of {delayInSeconds} seconds");
 
-                            ////    if (attempt == 0)
-                            ////        Console.WriteLine($"Request failed, let's retry after a delay of {delayInSeconds} seconds");
-                            ////    else if (attempt == MaxRetry)
-                            ////        Console.WriteLine($"This was the last retry attempt {attempt}");
-                            ////    else
-                            ////        Console.WriteLine($"This was retry attempt {attempt}, let's retry after a delay of {delayInSeconds} seconds");
+                    return true;
+                }
+            };
 
-                            ////    return true;
-                            ////})
-                            .GetAsync();
+            var requestOptions = new List<IRequestOption>
+            {
+                retryHandlerOption,
+            };
+
+            User? user = await graphClient
+                .Users[userId]
+                .GetAsync(requestConfiguration => requestConfiguration.Options = requestOptions);
 
             Console.WriteLine("User information:");
             PrintUserInformation(user, writeJsonObjectsToOutput);

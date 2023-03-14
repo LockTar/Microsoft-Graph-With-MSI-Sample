@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Graph" Version="5.1.0" />
+    <PackageReference Include="Microsoft.Graph.Beta" Version="5.21.0-preview" />
   </ItemGroup>
 
   <ItemGroup>
