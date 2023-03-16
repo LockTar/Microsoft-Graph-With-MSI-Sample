@@ -148,14 +148,16 @@ namespace Core.Graph
                 //Console.WriteLine(odataError.Error.Code);
                 //Console.WriteLine(odataError.Error.Message);
 
-                Console.WriteLine($"Add user {user.Id} as owner to group '{group.DisplayName}'");
-                ReferenceCreate referenceCreate = new ReferenceCreate();
-                referenceCreate.OdataId = "https://graph.microsoft.com/v1.0/directoryObjects/" + user.Id;
+                Console.WriteLine($"Add user {user.Id} as owner to group '{group.DisplayName}'");               
 
                 await graphClient.Groups[group.Id]
                     .Owners
                     .Ref
-                    .PostAsync(referenceCreate);
+                    .PostAsync(
+                        new ReferenceCreate
+                        {
+                            OdataId = "https://graph.microsoft.com/v1.0/directoryObjects/" + user.Id
+                        });
 
                 Console.WriteLine($"User {user.Id} added as owner to group '{group.DisplayName}'");
             }
@@ -186,13 +188,15 @@ namespace Core.Graph
                 //Console.WriteLine(odataError.Error.Message);
 
                 Console.WriteLine($"Add user {user.Id} as member to group '{group.DisplayName}'");
-                ReferenceCreate referenceCreate = new ReferenceCreate();
-                referenceCreate.OdataId = "https://graph.microsoft.com/v1.0/directoryObjects/" + user.Id;
 
                 await graphClient.Groups[group.Id]
                     .Members
                     .Ref
-                    .PostAsync(referenceCreate);
+                    .PostAsync(
+                        new ReferenceCreate
+                        {
+                            OdataId = "https://graph.microsoft.com/v1.0/directoryObjects/" + user.Id
+                        });
 
                 Console.WriteLine($"User {user.Id} added as member to group '{group.DisplayName}'");
             }
