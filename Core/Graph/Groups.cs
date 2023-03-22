@@ -2,6 +2,7 @@
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Models.ODataErrors;
+using System.Net;
 
 namespace Core.Graph
 {
@@ -143,7 +144,7 @@ namespace Core.Graph
 
                 Console.WriteLine($"User {user.DisplayName} - {user.Id} already owner of group '{group.DisplayName}'");
             }
-            catch (ODataError odataError) when (odataError.Error.Code.Equals("Request_ResourceNotFound"))
+            catch (ODataError odataError) when (odataError.ResponseStatusCode.Equals(HttpStatusCode.NotFound))
             {
                 //Console.WriteLine(odataError.Error.Code);
                 //Console.WriteLine(odataError.Error.Message);
@@ -182,7 +183,7 @@ namespace Core.Graph
 
                 Console.WriteLine($"User {user.Id} already member of group '{group.DisplayName}'");
             }
-            catch (ODataError odataError) when (odataError.Error.Code.Equals("Request_ResourceNotFound"))
+            catch (ODataError odataError) when (odataError.ResponseStatusCode.Equals(HttpStatusCode.NotFound))
             {
                 //Console.WriteLine(odataError.Error.Code);
                 //Console.WriteLine(odataError.Error.Message);
