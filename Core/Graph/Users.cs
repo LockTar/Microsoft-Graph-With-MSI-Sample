@@ -39,7 +39,10 @@ namespace Core.Graph
                     if (attempt == 0)
                         Console.WriteLine($"Request failed, let's retry after a delay of {delayInSeconds} seconds");
                     else if (attempt == MaxRetry)
+                    {
                         Console.WriteLine($"This was the last retry attempt {attempt}");
+                        return false;
+                    }
                     else
                         Console.WriteLine($"This was retry attempt {attempt}, let's retry after a delay of {delayInSeconds} seconds");
 
