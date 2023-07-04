@@ -8,7 +8,7 @@ using NSubstitute;
 
 namespace Tests;
 
-public class UserTests
+public class MicrosoftGraphUserTests
 {
     [Fact]
     public async Task Microsoft_Graph_All_Users()
